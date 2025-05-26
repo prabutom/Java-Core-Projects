@@ -8,17 +8,36 @@ import com.logging.framework.core.Logger;
 import com.logging.framework.specialized.DatabaseLogger;
 import com.logging.framework.specialized.KafkaLogger;
 import com.logging.framework.specialized.RestApiLogger;
+import com.logging.framework.writers.AsyncLogWriter;
 
 public class LoggFactory {
 
     private static LoggingConfiguration config;
     private static AppContext appContext;
+    private static AsyncLogWriter asyncWriter;
 
     public static void initialize(LoggingConfiguration configuration,
                                   AppContext applicationContext) {
         config = configuration;
         appContext = applicationContext;
+
+        if (config.isAsyncLogging()) {
+            LogWriter baseWriter = configuration.getBaseLogWriter(); // Need to add this method
+            asyncWriter = new AsyncLogWriter(baseWriter, config.getQueueCapacity());
+        }
+
     }
+
+    public static void shutdown() {
+        if (asyncWriter != null) {
+            asyncWriter.shutdown();
+        }
+    }
+
+    private static LogWriter getActiveWriter() {
+        return config.isAsyncLogging() ? asyncWriter : config.getLogWriter();
+    }
+
 
     // Solution for basic logger - using a concrete subclass
     private static class SimpleLogger extends BaseLogger<SimpleLogger> {

@@ -1,6 +1,7 @@
 package com.logging.framework.config;
 
 import com.logging.framework.core.LogWriter;
+import com.logging.framework.writers.AsyncLogWriter;
 import com.logging.framework.writers.ConsoleLogWriter;
 import com.logging.framework.writers.FileLogWriter;
 import com.logging.framework.formatters.JsonLogFormatter;
@@ -9,6 +10,8 @@ import com.logging.framework.formatters.TextLogFormatter;
 public class LoggingConfiguration {
 
     private LogWriter logWriter;
+    private boolean asyncLogging = false;
+    private int queueCapacity = 1000;
     private boolean includeStackTrace = true;
     private boolean includeContext = true;
 
@@ -50,8 +53,28 @@ public class LoggingConfiguration {
         return this;
     }
 
+    public boolean isAsyncLogging() {
+        return asyncLogging;
+    }
+    public LoggingConfiguration withAsyncLogging(boolean async) {
+        this.asyncLogging = async;
+        return this;
+    }
+
+    public LoggingConfiguration withQueueCapacity(int capacity) {
+        this.queueCapacity = capacity;
+        return this;
+    }
+
+    public LogWriter getBaseLogWriter() {
+        return logWriter; // Returns the original writer before async wrapper
+    }
+
     // Getters
     public LogWriter getLogWriter() {
+        if (asyncLogging) {
+            return new AsyncLogWriter(logWriter, queueCapacity);
+        }
         return logWriter;
     }
 
@@ -61,5 +84,9 @@ public class LoggingConfiguration {
 
     public boolean isIncludeContext() {
         return includeContext;
+    }
+
+    public int getQueueCapacity() {
+        return queueCapacity;
     }
 }
