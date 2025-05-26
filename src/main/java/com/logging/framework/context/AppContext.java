@@ -1,18 +1,18 @@
 package com.logging.framework.context;
 
-public class ApplicationContext {
+public class AppContext {
     private String applicationName;
     private String organizationName;
     private String environment;
 
     // Singleton instance
-    private static ApplicationContext instance;
+    private static AppContext instance;
 
-    private ApplicationContext() {}
+    private AppContext() {}
 
-    public static synchronized ApplicationContext getInstance() {
+    public static synchronized AppContext getInstance() {
         if (instance == null) {
-            instance = new ApplicationContext();
+            instance = new AppContext();
         }
         return instance;
     }

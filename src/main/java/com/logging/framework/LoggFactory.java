@@ -1,7 +1,7 @@
 package com.logging.framework;
 
 import com.logging.framework.config.LoggingConfiguration;
-import com.logging.framework.context.ApplicationContext;
+import com.logging.framework.context.AppContext;
 import com.logging.framework.core.BaseLogger;
 import com.logging.framework.core.LogWriter;
 import com.logging.framework.core.Logger;
@@ -9,20 +9,20 @@ import com.logging.framework.specialized.DatabaseLogger;
 import com.logging.framework.specialized.KafkaLogger;
 import com.logging.framework.specialized.RestApiLogger;
 
-public class LoggerFactory {
+public class LoggFactory {
 
     private static LoggingConfiguration config;
-    private static ApplicationContext appContext;
+    private static AppContext appContext;
 
     public static void initialize(LoggingConfiguration configuration,
-                                  ApplicationContext applicationContext) {
+                                  AppContext applicationContext) {
         config = configuration;
         appContext = applicationContext;
     }
 
     // Solution for basic logger - using a concrete subclass
     private static class SimpleLogger extends BaseLogger<SimpleLogger> {
-        SimpleLogger(String name, LogWriter logWriter, ApplicationContext appContext) {
+        SimpleLogger(String name, LogWriter logWriter, AppContext appContext) {
             super(name, logWriter, appContext);
         }
     }

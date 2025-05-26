@@ -2,13 +2,13 @@ package com.logging.framework.specialized;
 
 import com.logging.framework.core.BaseLogger;
 import com.logging.framework.core.LogWriter;
-import com.logging.framework.context.ApplicationContext;
+import com.logging.framework.context.AppContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class RestApiLogger extends BaseLogger<RestApiLogger> {
 
-    public RestApiLogger(String name, LogWriter logWriter, ApplicationContext appContext) {
+    public RestApiLogger(String name, LogWriter logWriter, AppContext appContext) {
         super(name, logWriter, appContext);
     }
 

@@ -2,13 +2,13 @@ package com.logging.framework.specialized;
 
 import com.logging.framework.core.BaseLogger;
 import com.logging.framework.core.LogWriter;
-import com.logging.framework.context.ApplicationContext;
+import com.logging.framework.context.AppContext;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 public class KafkaLogger extends BaseLogger<KafkaLogger> {
 
-    public KafkaLogger(String name, LogWriter logWriter, ApplicationContext appContext) {
+    public KafkaLogger(String name, LogWriter logWriter, AppContext appContext) {
         super(name, logWriter, appContext);
     }
 
