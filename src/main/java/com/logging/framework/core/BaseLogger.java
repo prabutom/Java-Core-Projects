@@ -2,10 +2,12 @@ package com.logging.framework.core;
 
 import com.logging.framework.context.AppContext;
 
+import java.lang.management.ClassLoadingMXBean;
 import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryPoolMXBean;
+import java.lang.management.MemoryUsage;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public abstract class BaseLogger<T extends BaseLogger<T>> implements Logger<T> {
 
@@ -111,6 +113,85 @@ protected void log(LogLevel level, String message, Throwable throwable) {
     }
 
     private void addTraceContext(Map<String, Object> context) {
+        // Get the current thread and its stack trace
+        Thread currentThread = Thread.currentThread();
+        StackTraceElement[] fullStackTrace = currentThread.getStackTrace();
+
+        // Calculate how much of the stack trace we want to capture (with reasonable limits)
+        int skipFrames = 5; // Skip logging framework internal frames
+        int maxDepth = 20; // Maximum depth we'll capture
+        int actualDepth = Math.min(fullStackTrace.length - skipFrames, maxDepth);
+
+        // Prepare detailed stack trace information
+        List<Map<String, Object>> detailedStackTrace = new ArrayList<>();
+        for (int i = skipFrames; i < skipFrames + actualDepth; i++) {
+            StackTraceElement element = fullStackTrace[i];
+            Map<String, Object> frameInfo = new LinkedHashMap<>();
+            frameInfo.put("class", element.getClassName());
+            frameInfo.put("method", element.getMethodName());
+            frameInfo.put("file", element.getFileName());
+            frameInfo.put("line", element.getLineNumber());
+            frameInfo.put("module", element.getModuleName());
+            frameInfo.put("native", element.isNativeMethod());
+            detailedStackTrace.add(frameInfo);
+        }
+
+        // Add to context
+        context.put("detailed_stacktrace", detailedStackTrace);
+        context.put("stacktrace_depth", actualDepth);
+        context.put("thread_id", currentThread.getId());
+        context.put("thread_state", currentThread.getState().toString());
+        context.put("thread_priority", currentThread.getPriority());
+
+        // Add memory statistics
+        context.put("memory", getDetailedMemoryStatistics());
+
+        // Add class loading information
+        context.put("class_loading", getClassLoadingStatistics());
+
+        // Add system context
+        context.put("available_processors", Runtime.getRuntime().availableProcessors());
+        context.put("system_load", ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage());
+    }
+
+    private Map<String, Object> getDetailedMemoryStatistics() {
+        Map<String, Object> memoryStats = new LinkedHashMap<>();
+        Runtime runtime = Runtime.getRuntime();
+        memoryStats.put("free", runtime.freeMemory());
+        memoryStats.put("total", runtime.totalMemory());
+        memoryStats.put("max", runtime.maxMemory());
+        memoryStats.put("used", runtime.totalMemory() - runtime.freeMemory());
+
+        // Add memory pool information if available
+        try {
+            List<Map<String, Object>> memoryPools = new ArrayList<>();
+            for (MemoryPoolMXBean pool : ManagementFactory.getMemoryPoolMXBeans()) {
+                Map<String, Object> poolInfo = new LinkedHashMap<>();
+                MemoryUsage usage = pool.getUsage();
+                poolInfo.put("name", pool.getName());
+                poolInfo.put("used", usage.getUsed());
+                poolInfo.put("committed", usage.getCommitted());
+                poolInfo.put("max", usage.getMax());
+                memoryPools.add(poolInfo);
+            }
+            memoryStats.put("pools", memoryPools);
+        } catch (SecurityException e) {
+            // Don't fail if we can't get memory pool info
+        }
+
+        return memoryStats;
+    }
+
+    private Map<String, Object> getClassLoadingStatistics() {
+        Map<String, Object> classLoading = new LinkedHashMap<>();
+        ClassLoadingMXBean classLoadingBean = ManagementFactory.getClassLoadingMXBean();
+        classLoading.put("loaded", classLoadingBean.getLoadedClassCount());
+        classLoading.put("total_loaded", classLoadingBean.getTotalLoadedClassCount());
+        classLoading.put("unloaded", classLoadingBean.getUnloadedClassCount());
+        return classLoading;
+    }
+/*
+    private void addTraceContext(Map<String, Object> context) {
         // Add finest-grained tracing information
         context.put("thread_state", Thread.currentThread().getState().toString());
         context.put("stack_depth", Thread.currentThread().getStackTrace().length);
@@ -118,6 +199,7 @@ protected void log(LogLevel level, String message, Throwable throwable) {
         context.put("loaded_classes", getLoadedClassCount());
         // Add any other very detailed tracing information
     }
+*/
 
     private void addDebugContext(Map<String, Object> context) {
         // Add debug-level information including stack trace
