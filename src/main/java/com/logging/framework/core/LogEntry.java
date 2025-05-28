@@ -9,6 +9,7 @@ public class LogEntry {
     private final String loggerName;
     private final String message;
     private final Throwable throwable;
+    private final String correlationId;
     private final String applicationName;
     private final String organizationName;
     private final String environment;
@@ -17,16 +18,21 @@ public class LogEntry {
     // Constructor, getters omitted for brevity
     // (Would include all these in actual implementation)
 
-    public LogEntry(Instant timestamp, LogLevel level, String loggerName, String message, Throwable throwable, String applicationName, String organizationName, String environment, Map<String, Object> context) {
+    public LogEntry(Instant timestamp, LogLevel level, String loggerName, String message, Throwable throwable, String correlationId, String applicationName, String organizationName, String environment, Map<String, Object> context) {
         this.timestamp = timestamp;
         this.level = level;
         this.loggerName = loggerName;
         this.message = message;
         this.throwable = throwable;
+        this.correlationId = correlationId;
         this.applicationName = applicationName;
         this.organizationName = organizationName;
         this.environment = environment;
         this.context = context;
+    }
+
+    public String getCorrelationId() {
+        return correlationId;
     }
 
     public Instant getTimestamp() {

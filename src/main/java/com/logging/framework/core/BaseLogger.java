@@ -105,6 +105,7 @@ protected void log(LogLevel level, String message, Throwable throwable) {
                 name,
                 message,
                 throwable,
+                appContext.getOrCreateCorrelationId(),
                 appContext.getApplicationName(),
                 appContext.getOrganizationName(),
                 appContext.getEnvironment(),

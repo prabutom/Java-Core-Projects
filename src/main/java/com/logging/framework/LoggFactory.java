@@ -22,7 +22,7 @@ public class LoggFactory {
         appContext = applicationContext;
 
         if (config.isAsyncLogging()) {
-            LogWriter baseWriter = configuration.getBaseLogWriter(); // Need to add this method
+            LogWriter baseWriter = config.getBaseLogWriter(); // Need to add this method
             asyncWriter = new AsyncLogWriter(baseWriter, config.getQueueCapacity());
         }
 
